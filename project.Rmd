@@ -29,5 +29,145 @@ plot(pressure)
 
 Note that the `echo = FALSE` parameter was added to the code chunk to prevent printing of the R code that generated the plot.
 
-Will have the basic models for altitude migration.
+We will have the basic models for altitude migration.
+This will progress to two pairs of equations for the residents and migrants eventually.
+```{r}
+##i = c(1:4)
+## really simple function to show popn growth
+Residents <- function(r,K,initial){
+  initial*(1+r*(1-(initial/K)))
+}
+
+Residents(r=1.5,initial=120,K=900)
+```
+We see that with the example, the function is able to calculate the change after one season to the population size.
+
+
+Next, we have constructed from this basic population model, an iterative loop showing the increase in resident population under varying parameter conditions.
+```{r}
+
+
+population = 10
+for (i in 1:10) {
+  print(population<-Residents(r=1.5,initial=population,K=1030))
+  ##population=Residents(r=1.5,initial=population,K=900)
+  ##print(population)
+}
+#plot(population)
+
+```
+Now we can see how it increases over multiple seasons/years.
+
+
+From this, we will try and produce a model which incorporates seasonality. In order to do this, our model will have to become a pair of functions alternating between summer carrying capacity and winter carrying capacity.
+```{r}
+Residentsummer <- function(r,K1,initial){
+  initial*(1+r*(1-(initial/K1)))
+}
+Residentwinter <- function(r,K2,initial){
+  initial*(1+r*(1-(initial/K2)))
+}
+
+population = 10
+for (i in 1:20) {
+  if ((i %% 2) ==0){
+  print(population<-Residentsummer(r=0.5,initial=population,K1=2920))
+  }
+  else {
+  print(population<-Residentwinter(r=0.5,initial=population,K2=2297)) 
+  }
+}
+```
+This appears to work and is producing a wave similar to a time series, but it is very sensitive to large differences between summer and winter carrying capacities, which may not reflect the real world data.
+
+Moving forward with the current model, we shall try to start integrating migration into the model as well. This will come in two parts. Firstly, elevation based migrants, which will require us to split the resident species into multiple bins of elevation. Secondly, external migrants moving south for over-wintering, which will require both a resident and migrant function, similar to Lotka-Volterra competition models. We shall create functions for each of these aspects, and then try and combine them.
+We start with the external migrants.
+```{r}
+Resident1summer <- function(r,K1,initialR){
+  initialR*(1+r*(1-(initialR/K1)))
+}
+Resident1winter <- function(r,K2,initialR,initialM){
+  initialR*(1+r*(1-((initialR+initialM)/K2)))
+}
+Migrant1summer <- function(r,B1,initialM)
+  initialM*(1+r*(1-(initialM/B1)))
+
+Migrant1winter <- function(r,K2,initialR,initialM)
+  initialM*(1+r*(1-((initialR+initialM)/K2)))
+```
+Using these equations, we model the competition between these two groups.
+
+```{r}
+populationres = 10
+populationmig = 10
+for (i in 1:20) {
+  if ((i %% 2) ==0){
+  print(populationres<-Resident1summer(r=0.3,initialR=populationres,K1=2920))
+  print(populationmig<-Migrant1summer(r=0.5,initialM=populationmig,B1=200))
+  }
+  else {
+  print(populationres<-Resident1winter(r=0.1,initialR=populationres,initialM = populationmig,K2=2297))
+  print(populationmig<-Migrant1winter(r=0.5,initialR=populationres,initialM=populationmig,K2=2297))
+  }
+}
+```
+Currently, this model is very unstable and demands an r value < 0.5. With certain parameter values it can stabilise but overall this suggests that this model is not sufficient. 
+UPDATE: The winter equations had incorrect parentheses, has now been fixed and looks a lot better as long as r is still kept small.
+
+We will also try creating a model to include altitudinal migrants and see if this fares similarly. Here we include new parameters alpha and beta to explain the effect each species group has on the other one.
+```{r}
+Res1summer <- function(r,K1,initialR1){
+  initialR1*(1+r*(1-(initialR1/K1)))
+}
+Res1winter <- function(r,K2,initialR1,alpha,initialR2){
+  initialR1*(1+r*(1-((initialR1+alpha*initialR2)/K2)))
+}
+Res2summer <- function(r,B1,initialR2)
+  initialR2*(1+r*(1-(initialR2/B1)))
+
+Res2winter <- function(r,K2,initialR1,beta,initialR2)
+  initialR2*(1+r*(1-((initialR2+beta*initialR1)/K2)))
+```
+We now try to model the competition due to altitudinal migration.
+
+```{r}
+populationres1 = 10
+populationres2 = 10
+for (i in 1:20) {
+  if ((i %% 2) ==0){
+  print(populationres1<-Res1summer(r=0.3,initialR1=populationres1,K1=2920))
+  print(populationres2<-Res2summer(r=0.5,initialR2=populationres2,B1=200))
+  }
+  else {
+  print(populationres1<-Res1winter(r=0.1,initialR1=populationres1,alpha=0.1,initialR2=populationres2,K2=2297))
+  print(populationres2<-Res2winter(r=0.5,initialR2=populationres2,beta=0.2,initialR1=populationres1,K2=2297))
+  }
+}
+```
+This model seems to be reasonably stable, again within the same constraints.
+
+Next we shall combine the previous two steps so that we have a model with two bins, which also incorporates both altitudinal and external migration.
+
+
+Unrelated practicing:
+```{r}
+n=4
+for (i in 1:4){
+  print(n+3*i)
+}
+```
+
+
+```{r}
+library(primer)
+
+library(deSolve)
+# MUST use the 'euler' integration method with integer time steps
+p <- c(rd=1, alpha=.01)
+time <- 0:10
+initialN <- 10
+out <- ode(y=initialN, times=time,
+             func=dlogistic, parms=p, method='euler')
+plot(time, out[,-1], type='l')
+```
 
