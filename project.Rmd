@@ -46,16 +46,33 @@ We see that with the example, the function is able to calculate the change after
 Next, we have constructed from this basic population model, an iterative loop showing the increase in resident population under varying parameter conditions.
 ```{r}
 
-
 population = 10
-for (i in 1:10) {
-  print(population<-Residents(r=1.5,initial=population,K=1030))
-  ##population=Residents(r=1.5,initial=population,K=900)
-  ##print(population)
+year_vector<-c()
+population_vector<-c()
+
+#my_xs = c(0,10)
+#my_ys = c(0,950)
+ #plot(NA, type = "n", main = "One Resident Population",
+#    xlim = my_xs, ylim = my_ys, xlab = "Year", ylab =   #"Population")
+for (year in 1:10) {
+  ##print(population<-Residents(r=1.5,initial=population,K=1030))
+  population<-Residents(r=1.5,initial=population,K=900)
+  year_vector<-append(year_vector,year)
+  population_vector<-append(population_vector,population)
+  #points(x=i,y=population)
 }
-#plot(population)
+
+df<-data.frame( 
+  Year = year_vector,
+  Population = population_vector) 
+
+
+print(df)
+ggplot(df,aes(Year,Population)) + geom_line() + xlim(0, 10) + ylim(0, 950) + ggtitle("Resident Population")
+#print(myplot)
 
 ```
+
 Now we can see how it increases over multiple seasons/years.
 
 
@@ -146,8 +163,48 @@ for (i in 1:20) {
 ```
 This model seems to be reasonably stable, again within the same constraints.
 
-Next we shall combine the previous two steps so that we have a model with two bins, which also incorporates both altitudinal and external migration.
+Next we shall combine the previous two steps so that we have a model with two bins, which also incorporates both altitudinal and external migration. This will be the last step that we incorporate external migrants into the model due to uncertainty as to how they will be distributed among different patches.
 
+We now need functions for two resident species, one which migrates from patch 2 down to patch 1, plus an external migratory species which also arrives in patch 1.
+```{r}
+Res1summer <- function(r,K1s,initialR1){
+  initialR1*(1+r*(1-(initialR1/K1s)))
+}
+Res1winter <- function(r,K1w,initialR1,alpha,initialR2,sigma,initialM){
+  initialR1*(1+r*(1-((initialR1+alpha*initialR2)+sigma*initialM/K1w)))
+}
+Res2summer <- function(r,K2s,initialR2)
+  initialR2*(1+r*(1-(initialR2/K2s)))
+
+Res2winter <- function(r,K1w,initialR1,beta,initialR2,sigma,initialM)
+  initialR2*(1+r*(1-((initialR2+beta*initialR1+sigma*initialM)/K1w)))
+
+Migrant1summer <- function(r,B1,initialM)
+  initialM*(1+r*(1-(initialM/B1)))
+
+Migrant1winter <- function(r,K1w,beta,initialR1,alpha,initialR2,initialM)
+  initialM*(1+r*(1-((beta*initialR1 + alpha*initialR2  + initialM)/K1w)))
+```
+
+
+And then the model from these:
+```{r}
+populationres1 = 10
+populationres2 = 10
+populationmig = 10
+for (i in 1:20) {
+  if ((i %% 2) ==0){
+  print(populationres1<-Res1summer(r=0.1,initialR1=populationres1,K1s=2920))
+  print(populationres2<-Res2summer(r=0.5,initialR2=populationres2,K2s=200))
+   print(populationmig<-Migrant1summer(r=0.5,initialM=populationmig,B1=200))
+  }
+  else {
+  print(populationres1<-Res1winter(r=0.1,initialR1=populationres1,alpha=0.1,initialR2=populationres2,sigma=0.1,initialM=populationmig,K1w=2297))
+  print(populationres2<-Res2winter(r=0.5,initialR2=populationres2,beta=0.2,initialR1=populationres1,sigma=0.2,initialM=populationmig,K1w=2297))
+    print(populationmig<-Migrant1winter(r=0.5,alpha=0.1,initialR1=populationres1,beta=0.2,initialR2= populationres2,initialM=populationmig,K1w=2297))
+  }
+}
+```
 
 Unrelated practicing:
 ```{r}
