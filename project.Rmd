@@ -45,16 +45,11 @@ We see that with the example, the function is able to calculate the change after
 
 Next, we have constructed from this basic population model, an iterative loop showing the increase in resident population under varying parameter conditions.
 ```{r}
-
 population = 10
 year_vector<-c()
 population_vector<-c()
 
-#my_xs = c(0,10)
-#my_ys = c(0,950)
- #plot(NA, type = "n", main = "One Resident Population",
-#    xlim = my_xs, ylim = my_ys, xlab = "Year", ylab =   #"Population")
-for (year in 1:10) {
+for (year in (1:10)/2) {
   ##print(population<-Residents(r=1.5,initial=population,K=1030))
   population<-Residents(r=1.5,initial=population,K=900)
   year_vector<-append(year_vector,year)
@@ -69,7 +64,6 @@ df<-data.frame(
 
 print(df)
 ggplot(df,aes(Year,Population)) + geom_line() + xlim(0, 10) + ylim(0, 950) + ggtitle("Resident Population")
-#print(myplot)
 
 ```
 
@@ -326,13 +320,13 @@ Migrant4winter <- function(r,K3w,alpha,initialR3,initialM4)
 So for 4 residents and 3 migrants we have the following model:
 
 ```{r}
-populationres1 = 1000
-populationres2 = 1000
-populationres3 = 1000
-populationres4 = 100
-populationmig2 = 1000
-populationmig3 = 1000
-populationmig4 = 100
+populationres1 = 11178
+populationres2 = 3255
+populationres3 = 1577
+populationres4 = 152
+populationmig2 = 5466
+populationmig3 = 2463
+populationmig4 = 299
 year_vector<-c()
 populationres1_vector<-c()
 populationres2_vector<-c()
@@ -341,24 +335,24 @@ populationres4_vector<-c()
 populationmig2_vector<-c()
 populationmig3_vector<-c()
 populationmig4_vector<-c()
-for (year in 1:20) {
-  if ((year %% 2) ==0){
+for (year in (1:10)/2) {
+  if ((year %% 1) ==0){
   populationres1<-Res1summer(r=0.7,initialR1=populationres1,K1s=12689)
   populationres2<-Res2summer(r=0.7,initialR2=populationres2,K2s=4525,alpha=0.2,initialM2=populationmig2)
   populationres3<-Res3summer(r=0.7,initialR3=populationres3,K3s=2175,alpha=0.2,initialM3 = populationmig3)
   populationres4<-Res4summer(r=0.7,initialR4=populationres4,K4s=226,alpha=0.2,initialM4 = populationmig4)
-   populationmig2<-Migrant2summer(r=0.3,initialM2=populationmig2,K2s=4525,alpha = 0,initialR2 = populationres2)
-   populationmig3<-Migrant3summer(r=0.3,initialM3=populationmig3,K3s=2175,alpha = 0,initialR3 = populationres3)
-   populationmig4<-Migrant4summer(r=0.3,initialM4=populationmig4,K4s=226,alpha = 0,initialR4 = populationres4)
+   populationmig2<-Migrant2summer(r=0.7,initialM2=populationmig2,K2s=4525,alpha = 0.1,initialR2 = populationres2)
+   populationmig3<-Migrant3summer(r=0.7,initialM3=populationmig3,K3s=2175,alpha = 0.1,initialR3 = populationres3)
+   populationmig4<-Migrant4summer(r=0.7,initialM4=populationmig4,K4s=226,alpha = 0.1,initialR4 = populationres4)
   }
   else {
   populationres1<-Res1winter(r=0.7,initialR1=populationres1, sigma=0,initialM2 = populationmig2, K1w=9215)
   populationres2<-Res2winter(r=0.7,initialR2=populationres2, sigma=0,initialM3 = populationmig3, K2w=3185)
   populationres3<-Res3winter(r=0.7,initialR3=populationres3, sigma=0,initialM4 = populationmig4, K3w=1485)
   populationres4<-Res4winter(r=0.7,initialR4=populationres4, K4w=153)
-  populationmig2<-Migrant2winter(r=0.3,alpha=0,initialR1=populationres1,initialM2=populationmig2,K1w=9215)
-  populationmig3<-Migrant3winter(r=0.3,alpha=0,initialR2=populationres2,initialM3=populationmig3,K2w=3185)
-  populationmig4<-Migrant4winter(r=0.3,alpha=0,initialR3=populationres3,initialM4=populationmig4,K3w=1485)
+  populationmig2<-Migrant2winter(r=0.7,alpha=0.1,initialR1=populationres1,initialM2=populationmig2,K1w=9215)
+  populationmig3<-Migrant3winter(r=0.7,alpha=0.1,initialR2=populationres2,initialM3=populationmig3,K2w=3185)
+  populationmig4<-Migrant4winter(r=0.7,alpha=0.1,initialR3=populationres3,initialM4=populationmig4,K3w=1485)
   }
   year_vector<-append(year_vector,year)
   populationres1_vector<-append(populationres1_vector,populationres1)
@@ -389,28 +383,7 @@ print(df_long)
 
 ```
 Being careful with initial population sizes, it is possible to make this model stable. It shows some interesting behaviour, especially with the effect one destabilised population can have on all others. Migrant 1 does significantly better than Resident 2 despite summering in the same patch, demonstrating the clear benefits of migration.
+If the resources in a patch are decreased too dramatically, this will cause the model to destabalise, leading to the extinction of all the species. This does not seem entirely biologically realistic, as we are seeing a domino effect when one species goes extinct. This issue is most likely caused by the fact that the models don't stop running when a population goes into negative values.
 
-
-
-Unrelated practicing:
-```{r}
-n=4
-for (i in 1:4){
-  print(n+3*i)
-}
-```
-
-
-```{r}
-library(primer)
-
-library(deSolve)
-# MUST use the 'euler' integration method with integer time steps
-p <- c(rd=1, alpha=.01)
-time <- 0:10
-initialN <- 10
-out <- ode(y=initialN, times=time,
-             func=dlogistic, parms=p, method='euler')
-plot(time, out[,-1], type='l')
-```
+On intriguing element is that when the r rate is increased for migratory species in the summer, their numbers actually go down - this warrants further investigation.
 
