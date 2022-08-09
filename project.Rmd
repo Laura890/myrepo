@@ -86,14 +86,26 @@ Residentwinter <- function(r,K2,initial){
 }
 
 population = 10
-for (i in 1:20) {
-  if ((i %% 2) ==0){
+year_vector<-c()
+population_vector<-c()
+for (year in 1:30) {
+  if ((year %% 2) ==0){
   print(population<-Residentsummer(r=0.5,initial=population,K1=2920))
   }
   else {
   print(population<-Residentwinter(r=0.5,initial=population,K2=2297)) 
   }
+  year_vector<-append(year_vector,year)
+  population_vector<-append(population_vector,population)
 }
+
+df<-data.frame( 
+  Year = year_vector,
+  Population = population_vector) 
+
+
+print(df)
+ggplot(df,aes(Year,Population)) + geom_line() + xlim(0, 30) + ylim(0, 3000) + ggtitle("Resident Population with Seasonality")
 ```
 This appears to work and is producing a wave similar to a time series, but it is very sensitive to large differences between summer and winter carrying capacities, which may not reflect the real world data.
 
@@ -115,18 +127,37 @@ Migrant1winter <- function(r,K2,initialR,initialM)
 Using these equations, we model the competition between these two groups.
 
 ```{r}
-populationres = 10
+populationres = 200
 populationmig = 10
-for (i in 1:20) {
-  if ((i %% 2) ==0){
-  print(populationres<-Resident1summer(r=0.3,initialR=populationres,K1=2920))
-  print(populationmig<-Migrant1summer(r=0.5,initialM=populationmig,B1=200))
+year_vector<-c()
+populationres_vector<-c()
+populationmig_vector<-c()
+for (year in 1:80) {
+  if ((year %% 2) ==0){
+  populationres<-Resident1summer(r=0.3,initialR=populationres,K1=2920)
+  populationmig<-Migrant1summer(r=0.5,initialM=populationmig,B1=2000)
   }
   else {
-  print(populationres<-Resident1winter(r=0.1,initialR=populationres,initialM = populationmig,K2=2297))
-  print(populationmig<-Migrant1winter(r=0.5,initialR=populationres,initialM=populationmig,K2=2297))
+  populationres<-Resident1winter(r=0.1,initialR=populationres,initialM = populationmig,K2=2297)
+  populationmig<-Migrant1winter(r=0.5,initialR=populationres,initialM=populationmig,K2=2297)
   }
+  year_vector<-append(year_vector,year)
+  populationres_vector<-append(populationres_vector,populationres)
+  populationmig_vector<-append(populationmig_vector,populationmig)
 }
+
+df<-data.frame( 
+  Year = year_vector,
+  Population_Resident = populationres_vector,
+  Population_Migrant = populationmig_vector) 
+
+df_long<-gather(df,key="key",value="Population","Population_Resident","Population_Migrant")
+
+ ggplot(df_long,aes(x=Year, y=Population, colour=key)) +
+   geom_line()
+print(df)
+print(df_long)
+#ggplot(dfres,aes(Year,Population1),color="Population1") + geom_line() + xlim(0, 40) + ylim(0, 3000) + geom_line(data=dfmig,aes(color="Population2"))  +  ggtitle("Resident Population with Seasonality and Migrant")
 ```
 Currently, this model is very unstable and demands an r value < 0.5. With certain parameter values it can stabilise but overall this suggests that this model is not sufficient. 
 UPDATE: The winter equations had incorrect parentheses, has now been fixed and looks a lot better as long as r is still kept small.
@@ -148,18 +179,37 @@ Res2winter <- function(r,K2,initialR1,beta,initialR2)
 We now try to model the competition due to altitudinal migration.
 
 ```{r}
-populationres1 = 10
-populationres2 = 10
-for (i in 1:20) {
-  if ((i %% 2) ==0){
+populationres1 = 300
+populationres2 = 300
+year_vector<-c()
+populationres1_vector<-c()
+populationres2_vector<-c()
+for (year in 1:50) {
+  if ((year %% 2) ==0){
   print(populationres1<-Res1summer(r=0.3,initialR1=populationres1,K1=2920))
-  print(populationres2<-Res2summer(r=0.5,initialR2=populationres2,B1=200))
+  print(populationres2<-Res2summer(r=0.5,initialR2=populationres2,B1=2000))
   }
   else {
-  print(populationres1<-Res1winter(r=0.1,initialR1=populationres1,alpha=0.1,initialR2=populationres2,K2=2297))
+  print(populationres1<-Res1winter(r=0.3,initialR1=populationres1,alpha=0.1,initialR2=populationres2,K2=2297))
   print(populationres2<-Res2winter(r=0.5,initialR2=populationres2,beta=0.2,initialR1=populationres1,K2=2297))
   }
+  year_vector<-append(year_vector,year)
+  populationres1_vector<-append(populationres1_vector,populationres1)
+  populationres2_vector<-append(populationres2_vector,populationres2)
 }
+
+df<-data.frame( 
+  Year = year_vector,
+  Population_Resident1 = populationres1_vector,
+  Population_Resident2 = populationres2_vector) 
+
+df_long<-gather(df,key="key",value="Population","Population_Resident1","Population_Resident2")
+
+ ggplot(df_long,aes(x=Year, y=Population, colour=key)) +
+   geom_line() +ggtitle("Two Resident species, one migrates")
+print(df)
+print(df_long)
+
 ```
 This model seems to be reasonably stable, again within the same constraints.
 
@@ -171,7 +221,7 @@ Res1summer <- function(r,K1s,initialR1){
   initialR1*(1+r*(1-(initialR1/K1s)))
 }
 Res1winter <- function(r,K1w,initialR1,alpha,initialR2,sigma,initialM){
-  initialR1*(1+r*(1-((initialR1+alpha*initialR2)+sigma*initialM/K1w)))
+  initialR1*(1+r*(1-((initialR1+alpha*initialR2+sigma*initialM)/K1w)))
 }
 Res2summer <- function(r,K2s,initialR2)
   initialR2*(1+r*(1-(initialR2/K2s)))
@@ -189,22 +239,158 @@ Migrant1winter <- function(r,K1w,beta,initialR1,alpha,initialR2,initialM)
 
 And then the model from these:
 ```{r}
-populationres1 = 10
-populationres2 = 10
-populationmig = 10
-for (i in 1:20) {
-  if ((i %% 2) ==0){
-  print(populationres1<-Res1summer(r=0.1,initialR1=populationres1,K1s=2920))
-  print(populationres2<-Res2summer(r=0.5,initialR2=populationres2,K2s=200))
-   print(populationmig<-Migrant1summer(r=0.5,initialM=populationmig,B1=200))
+populationres1 = 1000
+populationres2 = 1000
+populationmig = 1000
+year_vector<-c()
+populationres1_vector<-c()
+populationres2_vector<-c()
+populationmig_vector<-c()
+for (year in 1:50) {
+  if ((year %% 2) ==0){
+  populationres1<-Res1summer(r=0.3,initialR1=populationres1,K1s=2920)
+  populationres2<-Res2summer(r=0.5,initialR2=populationres2,K2s=2000)
+   populationmig<-Migrant1summer(r=0.5,initialM=populationmig,B1=2000)
   }
   else {
-  print(populationres1<-Res1winter(r=0.1,initialR1=populationres1,alpha=0.1,initialR2=populationres2,sigma=0.1,initialM=populationmig,K1w=2297))
-  print(populationres2<-Res2winter(r=0.5,initialR2=populationres2,beta=0.2,initialR1=populationres1,sigma=0.2,initialM=populationmig,K1w=2297))
-    print(populationmig<-Migrant1winter(r=0.5,alpha=0.1,initialR1=populationres1,beta=0.2,initialR2= populationres2,initialM=populationmig,K1w=2297))
+  populationres1<-Res1winter(r=0.1,initialR1=populationres1,alpha=0.1,initialR2=populationres2,sigma=0.1,initialM=populationmig,K1w=2297)
+  populationres2<-Res2winter(r=0.5,initialR2=populationres2,beta=0.2,initialR1=populationres1,sigma=0.2,initialM=populationmig,K1w=2297)
+  populationmig<-Migrant1winter(r=0.5,alpha=0.1,initialR1=populationres1,beta=0.2,initialR2= populationres2,initialM=populationmig,K1w=2297)
   }
+  year_vector<-append(year_vector,year)
+  populationres1_vector<-append(populationres1_vector,populationres1)
+  populationres2_vector<-append(populationres2_vector,populationres2)
+  populationmig_vector<-append(populationmig_vector,populationmig)
 }
+
+df<-data.frame( 
+  Year = year_vector,
+  Population_Resident1 = populationres1_vector,
+  Population_Resident2 = populationres2_vector,
+  Population_Migrant = populationmig_vector) 
+
+df_long<-gather(df,key="key",value="Population","Population_Resident1","Population_Resident2","Population_Migrant")
+
+ ggplot(df_long,aes(x=Year, y=Population, colour=key)) +
+   geom_line() +ggtitle("Two Resident species, one migrates + one migratory")
+print(df)
+print(df_long)
 ```
+It is now quite difficult to keep all three populations stable. None of the species can have too small an r rate else they will become extinct.
+
+Finally, we shall produce a model to mimic an ecosystem comprising of 8 bins with altitudinal but not external migration. To simplify this, we will not have birds migrating from one patch to all others, but rather just a few based off of the data found in Taiwan. Primarily, those in the highest patches will usually migrate two bins down. For now, we shall exclude upward migration from middle segments as this is theorised to be a response to external migration, which is not included.
+```{r}
+Res1summer <- function(r,K1s,initialR1){
+  initialR1*(1+r*(1-(initialR1/K1s)))
+}
+Res1winter <- function(r,K1w,initialR1,sigma,initialM2){
+  initialR1*(1+r*(1-((initialR1+sigma*initialM2)/K1w)))
+}
+Res2summer <- function(r,K2s,initialR2,alpha,initialM2)
+  initialR2*(1+r*(1-(initialR2+alpha*initialM2)/K2s))
+
+Res2winter <- function(r,K2w,initialR2,sigma,initialM3)
+  initialR2*(1+r*(1-((initialR2+sigma*initialM3)/K2w)))
+
+Res3summer <- function(r,K3s,initialR3,alpha,initialM3){
+  initialR3*(1+r*(1-(initialR3+alpha*initialM3)/K3s))
+}
+Res3winter <- function(r,K3w,initialR3,sigma,initialM4){
+  initialR3*(1+r*(1-((initialR3+sigma*initialM4)/K3w)))
+}
+Res4summer <- function(r,K4s,initialR4,alpha,initialM4)
+  initialR4*(1+r*(1-(initialR4+alpha*initialM4)/K4s))
+
+Res4winter <- function(r,K4w,initialR4)
+  initialR4*(1+r*(1-(initialR4/K4w)))
+
+Migrant2summer <- function(r,K2s,initialM2,alpha,initialR2)
+  initialM2*(1+r*(1-(initialM2+alpha*initialR2)/K2s))
+
+Migrant2winter <- function(r,K1w,initialR1,alpha,initialM2)
+  initialM2*(1+r*(1-((alpha*initialR1+initialM2)/K1w)))
+
+Migrant3summer <- function(r,K3s,initialM3,alpha,initialR3)
+  initialM3*(1+r*(1-(initialM3+alpha*initialR3)/K3s))
+
+Migrant3winter <- function(r,K2w,alpha,initialR2,initialM3)
+  initialM3*(1+r*(1-((alpha*initialR2+initialM3)/K2w)))
+
+Migrant4summer <- function(r,K4s,initialM4,alpha,initialR4)
+  initialM4*(1+r*(1-(initialM4+alpha*initialR4)/K4s))
+
+Migrant4winter <- function(r,K3w,alpha,initialR3,initialM4)
+  initialM4*(1+r*(1-(alpha*initialR3+initialM4)/K3w))
+
+```
+So for 4 residents and 3 migrants we have the following model:
+
+```{r}
+populationres1 = 1000
+populationres2 = 1000
+populationres3 = 1000
+populationres4 = 100
+populationmig2 = 1000
+populationmig3 = 1000
+populationmig4 = 100
+year_vector<-c()
+populationres1_vector<-c()
+populationres2_vector<-c()
+populationres3_vector<-c()
+populationres4_vector<-c()
+populationmig2_vector<-c()
+populationmig3_vector<-c()
+populationmig4_vector<-c()
+for (year in 1:20) {
+  if ((year %% 2) ==0){
+  populationres1<-Res1summer(r=0.7,initialR1=populationres1,K1s=12689)
+  populationres2<-Res2summer(r=0.7,initialR2=populationres2,K2s=4525,alpha=0.2,initialM2=populationmig2)
+  populationres3<-Res3summer(r=0.7,initialR3=populationres3,K3s=2175,alpha=0.2,initialM3 = populationmig3)
+  populationres4<-Res4summer(r=0.7,initialR4=populationres4,K4s=226,alpha=0.2,initialM4 = populationmig4)
+   populationmig2<-Migrant2summer(r=0.3,initialM2=populationmig2,K2s=4525,alpha = 0,initialR2 = populationres2)
+   populationmig3<-Migrant3summer(r=0.3,initialM3=populationmig3,K3s=2175,alpha = 0,initialR3 = populationres3)
+   populationmig4<-Migrant4summer(r=0.3,initialM4=populationmig4,K4s=226,alpha = 0,initialR4 = populationres4)
+  }
+  else {
+  populationres1<-Res1winter(r=0.7,initialR1=populationres1, sigma=0,initialM2 = populationmig2, K1w=9215)
+  populationres2<-Res2winter(r=0.7,initialR2=populationres2, sigma=0,initialM3 = populationmig3, K2w=3185)
+  populationres3<-Res3winter(r=0.7,initialR3=populationres3, sigma=0,initialM4 = populationmig4, K3w=1485)
+  populationres4<-Res4winter(r=0.7,initialR4=populationres4, K4w=153)
+  populationmig2<-Migrant2winter(r=0.3,alpha=0,initialR1=populationres1,initialM2=populationmig2,K1w=9215)
+  populationmig3<-Migrant3winter(r=0.3,alpha=0,initialR2=populationres2,initialM3=populationmig3,K2w=3185)
+  populationmig4<-Migrant4winter(r=0.3,alpha=0,initialR3=populationres3,initialM4=populationmig4,K3w=1485)
+  }
+  year_vector<-append(year_vector,year)
+  populationres1_vector<-append(populationres1_vector,populationres1)
+  populationres2_vector<-append(populationres2_vector,populationres2)
+  populationres3_vector<-append(populationres3_vector,populationres3)
+  populationres4_vector<-append(populationres4_vector,populationres4)
+  populationmig2_vector<-append(populationmig2_vector,populationmig2)
+  populationmig3_vector<-append(populationmig3_vector,populationmig3)
+  populationmig4_vector<-append(populationmig4_vector,populationmig4)
+}
+
+df<-data.frame( 
+  Year = year_vector,
+  Population_Resident1 = populationres1_vector,
+  Population_Resident2 = populationres2_vector,
+  Population_Resident3 = populationres3_vector,
+  Population_Resident4 = populationres4_vector,
+  Population_Migrant1 = populationmig2_vector,
+  Population_Migrant2 = populationmig3_vector,
+  Population_Migrant3 = populationmig4_vector) 
+
+df_long<-gather(df,key="key",value="Population","Population_Resident1","Population_Resident2","Population_Resident3","Population_Resident4","Population_Migrant1","Population_Migrant2","Population_Migrant3")
+
+ ggplot(df_long,aes(x=Year, y=Population, colour=key)) +
+   geom_line() +ggtitle("Four Resident species + three migratory (altitudinal)")
+print(df)
+print(df_long)
+
+```
+Being careful with initial population sizes, it is possible to make this model stable. It shows some interesting behaviour, especially with the effect one destabilised population can have on all others. Migrant 1 does significantly better than Resident 2 despite summering in the same patch, demonstrating the clear benefits of migration.
+
+
 
 Unrelated practicing:
 ```{r}
