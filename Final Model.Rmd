@@ -9,6 +9,11 @@ output: html_document
 knitr::opts_chunk$set(echo = TRUE)
 ```
 
+
+```{r}
+library(tidyr)
+```
+
 Taking the previous 4 bin model we shall add 4 extra functions for external migrants travelling to each patch. These will all come from the same breeding patch, B. In total we will have 11 pairs of equations.
 ```{r}
 Res1summer <- function(r,K1s,initialR1){
@@ -107,29 +112,29 @@ populationmig4_vector<-c()
 for (year in (1:20)/2) {
   if ((year %% 1) ==0){
   populationres1<-Res1summer(r=0.7,initialR1=populationres1,K1s=12689)
-  populationres2<-Res2summer(r=0.7,initialR2=populationres2,K2s=4525,alpha=0.2,initialAM2=populationaltmig2)
+  populationres2<-Res2summer(r=0.7,initialR2=populationres2,K2s=2525,alpha=0.2,initialAM2=populationaltmig2)
   populationres3<-Res3summer(r=0.7,initialR3=populationres3,K3s=2175,alpha=0.2,initialAM3 = populationaltmig3)
   populationres4<-Res4summer(r=0.7,initialR4=populationres4,K4s=226,alpha=0.2,initialAM4 = populationaltmig4)
-  populationaltmig2<-Alt_Migrant2summer(r=0.7,initialAM2=populationaltmig2,K2s=4525,sigma = 0.2,initialR2 = populationres2)
+  populationaltmig2<-Alt_Migrant2summer(r=0.7,initialAM2=populationaltmig2,K2s=2525,sigma = 0.2,initialR2 = populationres2)
   populationaltmig3<-Alt_Migrant3summer(r=0.7,initialAM3=populationaltmig3,K3s=2175,sigma = 0.2,initialR3 = populationres3)
   populationaltmig4<-Alt_Migrant4summer(r=0.7,initialAM4=populationaltmig4,K4s=226,sigma = 0.2,initialR4 = populationres4)
-  populationmig1<-Migrant1summer(r=0.7,initialM1=populationmig1,B=12000,beta = 0.2,initialM2 = populationmig2,initialM3 = populationmig3,initialM4 = populationmig4)
-  populationmig2<-Migrant2summer(r=0.7,initialM2=populationmig2,B=12000,beta = 0.2,initialM1 = populationmig1,initialM3 = populationmig3,initialM4 = populationmig4)
-  populationmig3<-Migrant3summer(r=0.7,initialM3=populationmig3,B=12000,beta = 0.2,initialM1 = populationmig1,initialM2 = populationmig2,initialM4 = populationmig4)
-  populationmig4<-Migrant4summer(r=0.7,initialM4=populationmig4,B=12000,beta = 0.2,initialM1 = populationmig1,initialM2 = populationmig2,initialM3 = populationmig3)
+  populationmig1<-Migrant1summer(r=0.7,initialM1=populationmig1,B=10000,beta = 0.4,initialM2 = populationmig2,initialM3 = populationmig3,initialM4 = populationmig4)
+  populationmig2<-Migrant2summer(r=0.7,initialM2=populationmig2,B=10000,beta = 0.4,initialM1 = populationmig1,initialM3 = populationmig3,initialM4 = populationmig4)
+  populationmig3<-Migrant3summer(r=0.7,initialM3=populationmig3,B=10000,beta = 0.4,initialM1 = populationmig1,initialM2 = populationmig2,initialM4 = populationmig4)
+  populationmig4<-Migrant4summer(r=0.7,initialM4=populationmig4,B=10000,beta = 0.4,initialM1 = populationmig1,initialM2 = populationmig2,initialM3 = populationmig3)
   }
   else {
-  populationres1<-Res1winter(r=0.9,initialR1=populationres1, alpha=0.2,initialAM2 = populationaltmig2, beta = 0.2, initialM1 = populationmig1, K1w=9215)
-  populationres2<-Res2winter(r=0.9,initialR2=populationres2, alpha=0.2, initialAM3 = populationaltmig3, beta=0.2, initialM2 = populationmig2,K2w=3185)
-  populationres3<-Res3winter(r=0.9,initialR3=populationres3, alpha=0.2, initialAM4 = populationaltmig4, beta=0.2, initialM3 = populationmig3,K3w=1485)
-  populationres4<-Res4winter(r=0.9,initialR4=populationres4, beta=0.2, initialM4 = populationmig4, K4w=153)
-  populationaltmig2<-Alt_Migrant2winter(r=0.9, initialAM2 = populationaltmig2, sigma=0.2, initialR1=populationres1, beta=0.2, initialM1 = populationmig1, K1w=9215)
-  populationaltmig3<-Alt_Migrant3winter(r=0.9, initialAM3 = populationaltmig3, sigma=0.2, initialR2=populationres2, beta=0.2, initialM2=populationmig2, K2w=3185)
-  populationaltmig4<-Alt_Migrant4winter(r=0.9, initialAM4 = populationaltmig4, sigma=0.2, initialR3=populationres3, beta=0.2, initialM3 = populationmig3, K3w=1485)
-  populationmig1<-Migrant1winter(r=0.9, initialM1 = populationmig1, alpha=0.2, initialAM2 = populationaltmig2, sigma=0.2, initialR1=populationres1, K1w=9215)
-  populationmig2<-Migrant2winter(r=0.9, initialM2 = populationmig2, alpha=0.2, initialAM3 = populationaltmig3, sigma=0.2, initialR2=populationres2,K2w=3185)
-  populationmig3<-Migrant3winter(r=0.9, initialM3 = populationmig3, alpha=0.2, initialAM4 = populationaltmig4, sigma=0.2, initialR3 = populationres3, K3w=1485)
-  populationmig4<-Migrant4winter(r=0.9, initialM4 = populationmig4, sigma=0.2, initialR4=populationres4, K4w=153)
+  populationres1<-Res1winter(r=0.7,initialR1=populationres1, alpha=0.2,initialAM2 = populationaltmig2, beta = 0.2, initialM1 = populationmig1, K1w=9215)
+  populationres2<-Res2winter(r=0.7,initialR2=populationres2, alpha=0.2, initialAM3 = populationaltmig3, beta=0.2, initialM2 = populationmig2,K2w=1885)
+  populationres3<-Res3winter(r=0.7,initialR3=populationres3, alpha=0.2, initialAM4 = populationaltmig4, beta=0.2, initialM3 = populationmig3,K3w=1485)
+  populationres4<-Res4winter(r=0.7,initialR4=populationres4, beta=0.2, initialM4 = populationmig4, K4w=153)
+  populationaltmig2<-Alt_Migrant2winter(r=0.7, initialAM2 = populationaltmig2, sigma=0.2, initialR1=populationres1, beta=0.2, initialM1 = populationmig1, K1w=9215)
+  populationaltmig3<-Alt_Migrant3winter(r=0.7, initialAM3 = populationaltmig3, sigma=0.2, initialR2=populationres2, beta=0.2, initialM2=populationmig2, K2w=1885)
+  populationaltmig4<-Alt_Migrant4winter(r=0.7, initialAM4 = populationaltmig4, sigma=0.2, initialR3=populationres3, beta=0.2, initialM3 = populationmig3, K3w=1485)
+  populationmig1<-Migrant1winter(r=0.7, initialM1 = populationmig1, alpha=0.4, initialAM2 = populationaltmig2, sigma=0.4, initialR1=populationres1, K1w=9215)
+  populationmig2<-Migrant2winter(r=0.7, initialM2 = populationmig2, alpha=0.4, initialAM3 = populationaltmig3, sigma=0.4, initialR2=populationres2,K2w=1885)
+  populationmig3<-Migrant3winter(r=0.7, initialM3 = populationmig3, alpha=0.4, initialAM4 = populationaltmig4, sigma=0.4, initialR3 = populationres3, K3w=1485)
+  populationmig4<-Migrant4winter(r=0.7, initialM4 = populationmig4, sigma=0.4, initialR4=populationres4, K4w=153)
   }
   year_vector<-append(year_vector,year)
   populationres1_vector<-append(populationres1_vector,populationres1)
@@ -166,7 +171,7 @@ final_model1<-ggplot(df_long,aes(x=Year, y=Population, colour=key)) +
 print(df)
 print(df_long)
 print(final_model1)
-ggsave("myplot6.png", plot = final_model1,width = 10,height=6)
+ggsave("myplot8.png", plot = final_model1,width = 10,height=6)
 ```
 
 Model seems stable, and shows the levels we would expect. Small perturbations cause drops in numbers but not extinction, which is also a good sign.
@@ -187,3 +192,14 @@ print(df_combined)
 print(combined_model)
 ```
 
+```{r}
+df_ratio<-data.frame( 
+  Year = year_vector,
+  Population_Ratio = (populationres1_vector + populationres2_vector + populationres3_vector + populationres4_vector +populationaltmig2_vector + populationaltmig3_vector + populationaltmig4_vector)/
+(populationmig1_vector+ populationmig2_vector + populationmig3_vector + populationmig4_vector))
+
+ratio_model<-ggplot(df_ratio,aes(x=Year, y=Population_Ratio,)) +geom_line() +ggtitle("Resident/Migrant ratio") + ylim(1,2.5)
+print(df_ratio)
+print(ratio_model)
+ggsave("ratio4.png", plot = ratio_model,width = 10,height=6)
+```
