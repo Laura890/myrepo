@@ -1,0 +1,135 @@
+---
+title: "8 bin bipartite model"
+author: "me"
+date: '2022-10-10'
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+
+Model of 8 bins with 8 resident species and 24 migrant species (M3,M11,M19&M27 were removed due to crashing the model):
+```{r}
+PredpreyLV <- function(t,y,p){
+  N1<-y[1]
+  N2<-y[2]
+  N3<-y[3]
+  N4<-y[4]
+  N5<-y[5]
+  N6<-y[6]
+  N7<-y[7]
+  N8<-y[8]
+  M1<-y[9]
+  M2<-y[10]
+  M4<-y[11]
+  M5<-y[12]
+  M6<-y[13]
+  M7<-y[14]
+  M8<-y[15]
+  M9<-y[16]
+  M10<-y[17]
+  M12<-y[18]
+  M13<-y[19]
+  M14<-y[20]
+  M15<-y[21]
+  M16<-y[22]
+  M17<-y[23]
+  M18<-y[24]
+  M20<-y[25]
+  M21<-y[26]
+  M22<-y[27]
+  M23<-y[28]
+  M24<-y[29]
+  M25<-y[30]
+  M26<-y[31]
+  M28<-y[32]
+  with(as.list(p),{
+    mdN1dt<-r*m*N1*(1-C*((a*m*N1)/Ks1+(a*m*(N1+M1+M2+M4+M7+M16+M22))/Kw1))
+    mdN2dt<-r*m*N2*(1-C*((a*m*(N2+M1))/Ks2+(a*m*(N2+M8+M12+M17+M23))/Kw2))
+    mdN3dt<-r*m*N3*(1-C*((a*m*(N3+M2))/Ks3+(a*m*(N3+M6+M9+M13+M18+M24))/Kw3))
+    mdN4dt<-r*m*N4*(1-C*((a*m*(N4+M4+M5+M6))/Ks4+(a*m*(N4+M10+M14+M25))/Kw4))
+    mdN5dt<-r*m*N5*(1-C*((a*m*(N5+M7+M8+M9+M10))/Ks5+(a*m*(N5+M15+M20+M26))/Kw5))
+    mdN6dt<-r*m*N6*(1-C*((a*m*(N6+M12+M13+M14+M15))/Ks6+(a*m*(N6+M21))/Kw6))
+    mdN7dt<-r*m*N7*(1-C*((a*m*(N7+M16+M17+M18+M20+M21))/Ks7+(a*m*(N7+M28))/Kw7))
+    mdN8dt<-r*m*N8*(1-C*((a*m*(N8+M22+M23+M24+M25+M26+M28))/Ks8+(a*m*N8)/Kw8))
+    mdM1dt<-r*m*M1*(1-C*((a*m*(M1+N2))/Ks2+(a*m*(M1+N1+M2+M4+M7+M16+M22))/Kw1))
+    mdM2dt<-r*m*M2*(1-C*((a*m*(M2+N3))/Ks3+(a*m*(M2+N1+M1+M4+M7+M16+M22))/Kw1))
+    mdM4dt<-r*m*M4*(1-C*((a*m*(M4+N4+M5+M6))/Ks4+(a*m*(M4+N1+M1+M2+M7+M16+M22))/Kw1))
+    mdM5dt<-r*m*M5*(1-C*((a*m*(M5+N4+M4+M6))/Ks4+(a*m*(M5+N2+M8+M12+M17+M23))/Kw2))
+    mdM6dt<-r*m*M6*(1-C*((a*m*(M6+N4+M4+M5))/Ks4+(a*m*(M6+N3+M9+M13+M18+M24))/Kw3))
+    mdM7dt<-r*m*M7*(1-C*((a*m*(M7+N5+M8+M9+M10))/Ks5+(a*m*(M1+N1+M2+M4+M7+M16+M22))/Kw1))
+    mdM8dt<-r*m*M8*(1-C*((a*m*(M8+N5+M7+M9+M10))/Ks5+(a*m*(M5+N2+M8+M12+M17+M23))/Kw2))
+    mdM9dt<-r*m*M9*(1-C*((a*m*(M9+N5+M7+M8+M10))/Ks5+(a*m*(M6+N3+M9+M13+M18+M24))/Kw3))
+    mdM10dt<-r*m*M10*(1-C*((a*m*(M10+N5+M7+M8+M9))/Ks5+(a*m*(M10+N4+M14+M25))/Kw4))
+    mdM12dt<-r*m*M12*(1-C*((a*m*(N6+M12+M13+M14+M15))/Ks6+(a*m*(N2+M8+M12+M17+M23))/Kw2))
+    mdM13dt<-r*m*M13*(1-C*((a*m*(N6+M12+M13+M14+M15))/Ks6+(a*m*(N3+M6+M9+M13+M18+M24))/Kw3))
+    mdM14dt<-r*m*M14*(1-C*((a*m*(N6+M12+M13+M14+M15))/Ks6+(a*m*(N4+M10+M14+M25))/Kw4))
+    mdM15dt<-r*m*M15*(1-C*((a*m*(N6+M12+M13+M14+M15))/Ks6+(a*m*(N5+M15+M20+M26))/Kw5))
+    mdM16dt<-r*m*M16*(1-C*((a*m*(N7+M16+M17+M18+M20+M21))/Ks7+(a*m*(N1+M1+M2+M4+M7+M16+M22))/Kw1))
+    mdM17dt<-r*m*M17*(1-C*((a*m*(N7+M16+M17+M18+M20+M21))/Ks7+(a*m*(N2+M8+M12+M17+M23))/Kw2))
+    mdM18dt<-r*m*M18*(1-C*((a*m*(N7+M16+M17+M18+M20+M21))/Ks7+(a*m*(N3+M6+M9+M13+M18+M24))/Kw2))
+    mdM20dt<-r*m*M20*(1-C*((a*m*(N7+M16+M17+M18+M20+M21))/Ks7+(a*m*(N5+M15+M20+M26))/Kw2))
+    mdM21dt<-r*m*M21*(1-C*((a*m*(N7+M16+M17+M18+M20+M21))/Ks7+(a*m*(N6+M21))/Kw2))
+    mdM22dt<-r*m*M22*(1-C*((a*m*(N8+M22+M23+M24+M25+M26+M28))/Ks8+(a*m*(N1+M1+M2+M4+M7+M16+M22))/Kw2))
+    mdM23dt<-r*m*M23*(1-C*((a*m*(N8+M22+M23+M24+M25+M26+M28))/Ks8+(a*m*(N2+M8+M12+M17+M23))/Kw2))
+    mdM24dt<-r*m*M24*(1-C*((a*m*(N8+M22+M23+M24+M25+M26+M28))/Ks8+(a*m*(N3+M6+M9+M13+M18+M24))/Kw2))
+    mdM25dt<-r*m*M25*(1-C*((a*m*(N8+M22+M23+M24+M25+M26+M28))/Ks8+(a*m*(N4+M10+M14+M25))/Kw2))
+    mdM26dt<-r*m*M26*(1-C*((a*m*(N8+M22+M23+M24+M25+M26+M28))/Ks8+(a*m*(N5+M15+M20+M26))/Kw2))
+    mdM28dt<-r*m*M28*(1-C*((a*m*(N8+M22+M23+M24+M25+M26+M28))/Ks8+(a*m*(N7+M28))/Kw2))
+    return(list(c(mdN1dt,mdN2dt,mdN3dt,mdN4dt,mdN5dt,mdN6dt,mdN7dt,mdN8dt,mdM1dt,mdM2dt,mdM4dt,mdM5dt,mdM6dt,mdM7dt,mdM8dt,mdM9dt,mdM10dt,mdM12dt,mdM13dt,mdM14dt,mdM15dt,mdM16dt,mdM17dt,mdM18dt,mdM20dt,mdM21dt,mdM22dt,mdM23dt,mdM24dt,mdM25dt,mdM26dt,mdM28dt)))
+  })
+}
+
+r<-0.5;
+a<-1;
+b<-1;
+C<-0.5;
+m<-3
+Ks1<-9222;
+Ks2<-3448;
+Ks3<-2538;
+Ks4<-1988;
+Ks5<-1393
+Ks6<-782
+Ks7<-214
+Ks8<-13
+Kw1<-6665;
+Kw2<-2539
+Kw3<-1803
+Kw4<-1383
+Kw5<-953
+Kw6<-534
+Kw7<-145
+Kw8<-8
+p<-(c(r=r,a=a,b=b,C=C,m=m,Ks1=Ks1,Ks2=Ks2,Ks3=Ks3,Ks4=Ks4,Ks5=Ks5,Ks6=Ks6,Ks7=Ks7,Ks8=Ks8,Kw1=Kw1,Kw2=Kw2,Kw3=Kw3,Kw4=Kw4,Kw5=Kw5,Kw6=Kw6,Kw7=Kw7,Kw8=Kw8))
+y0<-c(N1=25,N2=5,N3=10,N4=10,N5=10,N6=10,N7=10,N8=10,M1=20,M2=10,M4=10,M5=10,M6=10,M7=10,M8=10,M9=10,M10=10,M12=10,M13=10,M14=10,M15=10,M16=10,M17=10,M18=10,M20=10,M21=10,M22=10,M23=10,M24=10,M25=10,M26=10,M28=10)
+times<-seq(0,200,1)
+LV.out<-ode(y=y0,times,PredpreyLV,p)
+print(LV.out)
+
+matplot(LV.out[,1],LV.out[,2:33],type="l",ylab="Population Size",xlab="Time (yrs)",main="Taiwan populations for 8 bins")
+```
+
+Bipartite graph of the population sizes:
+```{r}
+A <- matrix(c(LV.out[201,2],0,0,0,0,0,0,0,LV.out[201,10],LV.out[201,3],0,0,0,0,0,0,LV.out[201,11],0,LV.out[201,4],0,0,0,0,0,LV.out[201,12],LV.out[201,13],LV.out[201,14],LV.out[201,5],0,0,0,0,LV.out[201,15],LV.out[201,16],LV.out[201,17],LV.out[201,18],LV.out[201,6],0,0,0,0,LV.out[201,19],LV.out[201,20],LV.out[201,21],LV.out[201,22],LV.out[201,7],0,0,LV.out[201,23],LV.out[201,24],LV.out[201,25],0,LV.out[201,26],LV.out[201,27],LV.out[201,8],0,LV.out[201,28],LV.out[201,29],LV.out[201,30],LV.out[201,31],LV.out[201,32],LV.out[201,33],0,LV.out[201,9]),byrow = T, nrow = 8, ncol = 8)
+rownames(A) <- c("1s","2s","3s","4s","5s","6s","7s","8s")
+colnames(A) <- c("1w","2w","3w","4w","5w","6w","7w","8w")
+print(A)
+
+g <- graph.incidence(A, weighted = T)
+g
+
+V(g)$type
+
+par(mar = c(0.1, 0.1, 0.7, 0.1))  
+
+l <- layout.bipartite(g)
+V(g)$color <- V(g)$type
+V(g)$color=gsub("FALSE","red",V(g)$color)
+V(g)$color=gsub("TRUE","blue",V(g)$color)
+plot(g, edge.color="green3",edge.width=E(g)$weight/200,vertex.size=3*log(c(Ks1,Ks2,Ks3,Ks4,Ks5,Ks6,Ks7,Ks8,Kw1,Kw2,Kw3,Kw4,Kw5,Kw6,Kw7,Kw8)), layout=l[, c(2,1)],main="Taiwan 8 bins")
+```
+The formatting needs tweaking a bit but overall this works.
